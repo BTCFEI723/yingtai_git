@@ -155,3 +155,36 @@ git add *.py
 #
 # # 提交新版本
 # git commit -m "版本1.1：优化UI颜色与文案"
+
+# 最简单的方法：一次性提交所有修改
+#
+# bash
+# # 1. 添加当前目录下所有已修改的文件到暂存区
+# git add .
+#
+# # 2. 提交这些修改
+# git commit -m "版本1.2：增大标题字体，完善Git操作笔记"
+
+# 第三步：验证提交
+#
+# bash
+# # 查看提交历史
+# git log --oneline
+#
+# # 或查看最近一次提交的详情
+# git show HEAD
+
+
+"""方法	命令	效果	风险	推荐度
+git log --oneline 先确认版本
+只查看	git show 9bf13a5:3d-space-station.html	终端显示内容	无风险	⭐⭐⭐⭐
+创建副本	git show 9bf13a5:3d-space-station.html > 旧版.html	生成新文件	无风险	⭐⭐⭐⭐⭐
+"""
+
+"""
+# 撤销Python文件的修改（回到上次提交的状态）
+git restore "示例1-1 git操作命令清单.py"
+
+# 删除新增的HTML文件（如果不需要）
+rm "旧版.html"
+"""
