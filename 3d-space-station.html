@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>三维空间站 | 开发者日志</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* 基础重置与全局样式 */
+        :root {
+            --primary: #6366f1;
+            --secondary: #8b5cf6;
+            --accent: #06b6d4;
+            --dark: #1e293b;
+            --light: #f8fafc;
+            --shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #334155 100%);
+            color: var(--light);
+            min-height: 100vh;
+            overflow-x: hidden;
+            padding: 20px;
+        }
+
+        /* 3D透视容器 */
+        .perspective-container {
+            perspective: 1200px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        /* 3D卡片翻转效果 */
+        .card-3d {
+            width: 100%;
+            height: 300px;
+            position: relative;
+            transform-style: preserve-3d;
+            transition: transform 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            margin-bottom: 40px;
+            border-radius: 20px;
+            cursor: pointer;
+        }
+
+        .card-3d:hover {
+            transform: rotateY(15deg) rotateX(5deg) translateZ(20px);
+        }
+
+        .card-front, .card-back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            border-radius: 20px;
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            box-shadow: var(--shadow);
+        }
+
+        .card-front {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            transform: rotateY(0deg);
+        }
+
+        .card-back {
+            background: linear-gradient(135deg, var(--accent), #10b981);
+            transform: rotateY(180deg);
+        }
+
+        .card-3d.flipped {
+            transform: rotateY(180deg);
+        }
+
+        /* 悬浮动画元素 */
+        .floating-element {
+            position: absolute;
+            background: rgba(99, 102, 241, 0.2);
+            border-radius: 50%;
+            animation: float 6s ease-in-out infinite;
+        }
+
+        .floating-element:nth-child(1) {
+            width: 100px;
+            height: 100px;
+            top: 10%;
+            left: 5%;
+            animation-delay: 0s;
+        }
+
+        .floating-element:nth-child(2) {
+            width: 150px;
+            height: 150px;
+            top: 60%;
+            right: 10%;
+            animation-delay: 2s;
+            background: rgba(139, 92, 246, 0.15);
+        }
+
+        .floating-element:nth-child(3) {
+            width: 80px;
+            height: 80px;
+            bottom: 20%;
+            left: 15%;
+            animation-delay: 4s;
+            background: rgba(6, 182, 212, 0.2);
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            50% { transform: translateY(-20px) rotate(180deg); }
+        }
+
+        /* 内容区域 */
+        .container {
+            position: relative;
+            z-index: 10;
+            max-width: 1000px;
+            margin: 40px auto;
+            padding: 30px;
+            background: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: var(--shadow);
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 50px;
+        }
+
+        h1 {
+            font-size: 3.5rem;
+            background: linear-gradient(90deg, var(--primary), var(--accent));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            margin-bottom: 15px;
+            text-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .subtitle {
+            font-size: 1.3rem;
+            color: #cbd5e1;
+            max-width: 700px;
+            margin: 0 auto;
+            line-height: 1.6;
+        }
+
+        /* 技能进度条 */
+        .skill-bar {
+            height: 12px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            margin: 15px 0 25px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .skill-progress {
+            height: 100%;
+            border-radius: 10px;
+            background: linear-gradient(90deg, var(--primary), var(--accent));
+            position: relative;
+            transition: width 1.5s ease-out;
+            width: 0;
+        }
+
+        .skill-progress::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(90deg,
+                transparent,
+                rgba(255, 255, 255, 0.4),
+                transparent);
+            animation: shimmer 2s infinite;
+        }
+
+        @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+
+        /* 项目展示区 */
+        .project-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 25px;
+            margin: 40px 0;
+        }
+
+        .project-card {
+            background: rgba(30, 41, 59, 0.9);
+            border-radius: 15px;
+            padding: 25px;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(99, 102, 241, 0.2);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .project-card:hover {
+            transform: translateY(-10px);
+            border-color: var(--primary);
+            box-shadow: 0 15px 30px rgba(99, 102, 241, 0.3);
+        }
+
+        .project-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+            transition: left 0.7s;
+        }
+
+        .project-card:hover::before {
+            left: 100%;
+        }
+
+        /* Git练习提示区 */
+        .git-practice {
+            background: rgba(15, 23, 42, 0.8);
+            border-radius: 15px;
+            padding: 25px;
+            margin-top: 40px;
+            border-left: 5px solid var(--accent);
+        }
+
+        .code-block {
+            background: #0f172a;
+            padding: 15px;
+            border-radius: 10px;
+            font-family: 'Courier New', monospace;
+            margin: 15px 0;
+            overflow-x: auto;
+            border: 1px solid #334155;
+        }
+
+        .command {
+            color: #7dd3fc;
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            h1 { font-size: 2.5rem; }
+            .card-3d { height: 250px; }
+            .project-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <!-- 3D背景浮动元素 -->
+    <div class="floating-element"></div>
+    <div class="floating-element"></div>
+    <div class="floating-element"></div>
+
+    <div class="perspective-container">
+        <!-- 3D翻转卡片 -->
+        <div class="card-3d" id="mainCard">
+            <div class="card-front">
+                <h2 style="font-size: 2.2rem; margin-bottom: 15px;">✨ 欢迎来到我的三维空间站</h2>
+                <p style="font-size: 1.2rem;">点击卡片翻转，查看我的Git学习日志</p>
+                <div style="margin-top: 20px;">
+                    <i class="fas fa-code" style="margin-right: 10px;"></i>
+                    <i class="fas fa-cube" style="margin-right: 10px;"></i>
+                    <i class="fas fa-git-alt"></i>
+                </div>
+            </div>
+            <div class="card-back">
+                <h3 style="font-size: 1.8rem; margin-bottom: 15px;">🚀 Git版本控制练习中</h3>
+                <p>我正在通过这个3D网页练习：</p>
+                <ul style="margin-top: 10px; padding-left: 20px;">
+                    <li>git commit - 提交3D效果更新</li>
+                    <li>git branch - 创建新功能分支</li>
+                    <li>git merge - 合并动画效果</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <header>
+            <h1>三维空间站 | 开发者日志</h1>
+            <p class="subtitle">
+                探索代码与设计的交汇点。这个页面是我学习Git版本控制与前端3D效果的实践作品。
+                每一次提交都让这个空间站更加完善。
+            </p>
+        </header>
+
+        <section id="about">
+            <h2><i class="fas fa-user-astronaut" style="margin-right: 10px;"></i>关于空间站站长</h2>
+            <p>你好，探险者！我是这个三维空间站的创建者，一名全栈开发学习者。我的使命是将创意转化为交互式体验，并通过Git记录每一次进化。</p>
+            <p>这个空间站使用纯CSS实现3D效果，无需任何外部库。每一行代码都经过版本控制，见证着从空白文件到沉浸式界面的完整旅程。</p>
+        </section>
+
+        <section id="skills" style="margin-top: 40px;">
+            <h2><i class="fas fa-chart-line" style="margin-right: 10px;"></i>技能雷达</h2>
+            <div class="skill-item">
+                <div style="display: flex; justify-content: space-between;">
+                    <span>HTML5 & CSS3 (含3D变换)</span>
+                    <span>85%</span>
+                </div>
+                <div class="skill-bar">
+                    <div class="skill-progress" data-width="85"></div>
+                </div>
+            </div>
+
+            <div class="skill-item">
+                <div style="display: flex; justify-content: space-between;">
+                    <span>JavaScript & 动画编程</span>
+                    <span>70%</span>
+                </div>
+                <div class="skill-bar">
+                    <div class="skill-progress" data-width="70"></div>
+                </div>
+            </div>
+
+            <div class="skill-item">
+                <div style="display: flex; justify-content: space-between;">
+                    <span>Git版本控制系统</span>
+                    <span>75%</span>
+                </div>
+                <div class="skill-bar">
+                    <div class="skill-progress" data-width="75"></div>
+                </div>
+            </div>
+
+            <div class="skill-item">
+                <div style="display: flex; justify-content: space-between;">
+                    <span>响应式设计与UI/UX</span>
+                    <span>80%</span>
+                </div>
+                <div class="skill-bar">
+                    <div class="skill-progress" data-width="80"></div>
+                </div>
+            </div>
+        </section>
+
+        <section id="projects" style="margin-top: 40px;">
+            <h2><i class="fas fa-satellite" style="margin-right: 10px;"></i>星际项目</h2>
+            <div class="project-grid">
+                <div class="project-card">
+                    <h3>3D卡片星系</h3>
+                    <p>使用CSS 3D变换创建的交互式卡片系统，支持翻转、悬停和透视效果。</p>
+                    <div style="margin-top: 15px; color: var(--accent);">
+                        <i class="fas fa-code"></i> HTML/CSS · <i class="fas fa-cube"></i> 3D效果
+                    </div>
+                </div>
+
+                <div class="project-card">
+                    <h3>Git时间线可视化</h3>
+                    <p>将Git提交历史转换为三维时间轴，直观展示项目进化过程。</p>
+                    <div style="margin-top: 15px; color: var(--accent);">
+                        <i class="fas fa-git-alt"></i> Git API · <i class="fas fa-chart-bar"></i> 数据可视化
+                    </div>
+                </div>
+
+                <div class="project-card">
+                    <h3>浮动粒子引擎</h3>
+                    <p>纯CSS实现的动态背景粒子系统，具有平滑动画和交互响应。</p>
+                    <div style="margin-top: 15px; color: var(--accent);">
+                        <i class="fas fa-star"></i> CSS动画 · <i class="fas fa-magic"></i> 视觉效果
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="git-practice">
+            <h2><i class="fas fa-git-alt" style="margin-right: 10px;"></i>Git实验室</h2>
+            <p>这个空间站本身就是一个Git练习项目！尝试以下操作：</p>
+
+            <div class="code-block">
+                <span class="command"># 1. 第一次提交（初始版本）</span><br>
+                git add .<br>
+                git commit -m "创建3D空间站基础结构"
+            </div>
+
+            <div class="code-block">
+                <span class="command"># 2. 修改后的提交（比如更改颜色）</span><br>
+                git add style.css<br>
+                git commit -m "优化主色调为星际蓝"
+            </div>
+
+            <div class="code-block">
+                <span class="command"># 3. 创建分支添加新功能</span><br>
+                git checkout -b "add-animation"<br>
+                git add .<br>
+                git commit -m "添加卡片翻转动画"<br>
+                git checkout main<br>
+                git merge add-animation
+            </div>
+
+            <p style="margin-top: 15px;">每次完成修改后，使用 <code>git log --oneline --graph</code> 查看你的3D空间站进化树！</p>
+        </section>
+
+        <footer style="margin-top: 50px; text-align: center; color: #94a3b8; padding-top: 30px; border-top: 1px solid #334155;">
+            <p>三维空间站 v1.0 | 最后更新时间: <span id="current-date"></span></p>
+            <p style="margin-top: 10px;">
+                <i class="fas fa-rocket" style="margin-right: 5px;"></i>
+                这个页面专为Git版本控制练习设计 · 自由修改并提交你的版本！
+            </p>
+            <div style="margin-top: 20px; font-size: 0.9rem;">
+                提示：尝试修改CSS中的颜色变量(--primary, --accent)或添加新的浮动元素，然后提交更改。
+            </div>
+        </footer>
+    </div>
+
+    <script>
+        // 初始化技能条动画
+        document.querySelectorAll('.skill-progress').forEach(progress => {
+            const width = progress.getAttribute('data-width') + '%';
+            // 使用setTimeout确保动画在页面加载后执行
+            setTimeout(() => {
+                progress.style.width = width;
+            }, 300);
+        });
+
+        // 3D卡片点击翻转
+        document.getElementById('mainCard').addEventListener('click', function() {
+            this.classList.toggle('flipped');
+        });
+
+        // 自动更新日期
+        const currentDate = new Date().toLocaleDateString('zh-CN', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric',
+            weekday: 'long'
+        });
+        document.getElementById('current-date').textContent = currentDate;
+
+        // 项目卡片悬停效果增强
+        document.querySelectorAll('.project-card').forEach(card => {
+            card.addEventListener('mouseenter', function() {
+                this.style.zIndex = '100';
+            });
+
+            card.addEventListener('mouseleave', function() {
+                this.style.zIndex = '1';
+            });
+        });
+
+        // 控制台欢迎信息
+        console.log('🚀 三维空间站已加载完毕！');
+        console.log('💡 提示：尝试点击顶部的3D卡片查看翻转效果');
+        console.log('🔧 这个页面适合Git练习：修改 -> git add -> git commit');
+    </script>
+</body>
+</html>
