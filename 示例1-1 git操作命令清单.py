@@ -47,6 +47,100 @@ clear 或 Cmd+K	-	                        clear	       清空当前终端屏幕�
               git pull origin <分支>	      git pull origin main	 从远程仓库拉取最新更新到本地并合并。
 撤销与对比	  git diff	                  git diff	             查看工作区与暂存区文件的差异（具体改了哪些代码）。
               git restore <文件>	          git restore readme.md	 丢弃工作区的改动（让文件回到最后一次 add 或 commit 的状态）。
+              
+              
+                练习3：交互式查看历史
+
+                bash
+                # 图形化查看历史
+                git log --oneline --graph --all
+                
+                # 查看文件变化历史
+                git log --oneline -- 3d-space-station.html
+                练习4：清理测试文件
+                
+                bash
+                # 如果之前创建了test.txt等测试文件
+                git status
+                # 删除不需要的文件
+                rm -f test.txt *.tmp
+                git status
+
+                📝 实用命令备忘单
+                
+                场景	命令
+                安全撤销提交	git revert <commit>
+                查看简洁历史	git log --oneline -10
+                查看图形历史	git log --oneline --graph --all
+                比较两个版本	git diff <commit1> <commit2>
+                创建新分支	git checkout -b <分支名>
+                切换分支	git checkout <分支名>
+                当前状态	git status
+                
+                🕰️ 1. git log - 提交历史时间轴
+
+                    这是最常用的时间线查看方式，记录所有正式的提交。
+                    
+                    基础时间线查看：
+                    
+                    bash
+                    # 按时间倒序列出提交（最新在最上面）
+                    git log
+                    
+                    # 简洁模式（更适合快速浏览）
+                    git log --oneline
+                    
+                    # 带分支图的完整时间线
+                    git log --oneline --graph --all
+                    
+                    按时间范围筛选：
+                    
+                    bash
+                    # 查看最近3次提交
+                    git log -3
+                    git log --oneline -5
+                    
+                    # 查看某个时间之后的提交
+                    git log --since="2026-01-10"
+                    
+                    # 查看某个时间段的提交
+                    git log --since="2026-01-10" --until="2026-01-15"
+                    
+                    # 查看昨天到今天的提交
+                    git log --since="yesterday"
+                    git log --since="1 week ago"
+                    
+                    按作者/内容筛选：
+                    
+                    bash
+                    # 查看特定作者的提交
+                    git log --author="樱泰"
+                    
+                    # 搜索提交信息中包含关键词的
+                    git log --grep="revert"
+                    
+                    # 查看涉及某个文件的提交历史
+                    git log -- 3d-space-station.html
+                    
+                    # 查看文件的内容变化时间线
+                    git log -p -- 3d-space-station.html
+                    
+                    2. git reflog - 操作记录时间轴
+                    
+                    这是Git的“黑匣子”或“时间机器”，记录你执行的所有Git操作。
+                    
+                    查看完整操作历史：
+                    
+                    bash
+                    # 查看所有操作记录（按执行时间倒序）
+                    git reflog
+                    
+                    # 查看main分支的操作记录
+                    git reflog show main
+                    
+                    # 查看HEAD的操作记录
+                    git reflog show HEAD
+
 
 """
 
