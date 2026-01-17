@@ -47,8 +47,18 @@ clear 或 Cmd+K	-	                        clear	       清空当前终端屏幕�
               git pull origin <分支>	      git pull origin main	 从远程仓库拉取最新更新到本地并合并。
 撤销与对比	  git diff	                  git diff	             查看工作区与暂存区文件的差异（具体改了哪些代码）。
               git restore <文件>	          git restore readme.md	 丢弃工作区的改动（让文件回到最后一次 add 或 commit 的状态）。
-              
-              
+              git checkout -b 新分支 是创建并切换到新分支，它相当于以下两条命令：
+                      git branch 新分支 // 创建分支
+                      git checkout 新分支 // 切换到该分支
+                      
+              所以，如果你使用的是新版本Git，可以这样：
+
+                        创建分支：git branch 分支名
+                        切换分支：git switch 分支名
+                        创建并切换：git switch -c 分支名
+                        但是，为了兼容，git checkout 仍然可以使用。
+
+             
                 练习3：交互式查看历史
 
                 bash
