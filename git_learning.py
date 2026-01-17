@@ -139,16 +139,8 @@ if __name__ == "__main__":
     print("2. Git合并时不会出现JSON冲突")
     print("3. 可以用任何文本编辑器编辑")
     print("4. 可以用Python的注释功能做笔记")
-EOF
-
-# 给执行权限
-chmod + x
-git_learning.py
-
-# 添加到Git跟踪
-git
-add
-git_learning.py
-git
-commit - m
-"创建Git学习Python脚本"
+# 2. 在主分支也修改文件
+"""echo "" >> git_learning.py
+echo "# 我在main分支上添加的内容" >> git_learning.py
+echo "def main_branch_function():" >> git_learning.py
+echo "    print('这是从main分支添加的函数')" >> git_learning.py"""
