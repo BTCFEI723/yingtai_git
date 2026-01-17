@@ -53,9 +53,9 @@ clear 或 Cmd+K	-	                        clear	       清空当前终端屏幕�
                       
               所以，如果你使用的是新版本Git，可以这样：
 
-                        创建分支：git branch 分支名
-                        切换分支：git switch 分支名
-                        创建并切换：git switch -c 分支名
+                            创建分支：git branch 分支名
+                            切换分支：git switch 分支名
+                            创建并切换：git switch -c 分支名
                         但是，为了兼容，git checkout 仍然可以使用。
 
              
