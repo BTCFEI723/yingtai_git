@@ -1,6 +1,6 @@
-git add git_tutorial.py
-git commit -m "添加结构化的Git教程脚本"
-cat > git_tutorial.py << 'EOF'
+# git add git_tutorial.py
+# git commit -m "添加结构化的Git教程脚本"
+# cat > git_tutorial.py << 'EOF'
 #!/usr/bin/env python3
 """
 Git教程 - 结构化版本
